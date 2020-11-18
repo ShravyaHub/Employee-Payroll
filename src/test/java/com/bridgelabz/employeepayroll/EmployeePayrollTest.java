@@ -23,4 +23,11 @@ public class EmployeePayrollTest {
         Assert.assertTrue(result);
     }
 
+    @Test
+    public void givenEmployeePayrollData_ShouldNumberOfEmployeesWithinDateRange() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(DATABASE_IO, "2020-03-01", "2020-04-30");
+        Assert.assertEquals(2, employeePayrollData.size());
+    }
+
 }
