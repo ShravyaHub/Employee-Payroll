@@ -42,8 +42,16 @@ public class EmployeePayrollService {
     public List<EmployeePayrollData> readEmployeePayrollData(IOService ioService) throws EmployeePayrollException {
         try {
             if (ioService.equals(IOService.DATABASE_IO))
-                return this.employeePayrollData = EmployeePayrollDatabaseService.getInstance().readData(null, null);
+                return this.employeePayrollData = EmployeePayrollDatabaseService.getInstance().readData((LocalDate) null, null);
             return this.employeePayrollData;
+        } catch (EmployeePayrollException employeePayrollException) {
+            throw new EmployeePayrollException("Cannot execute query", EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
+        }
+    }
+
+    public int readEmployeePayrollData(String action, String gender) throws EmployeePayrollException {
+        try {
+            return EmployeePayrollDatabaseService.getInstance().readData(action, gender);
         } catch (EmployeePayrollException employeePayrollException) {
             throw new EmployeePayrollException("Cannot execute query", EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
         }
