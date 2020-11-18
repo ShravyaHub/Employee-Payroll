@@ -25,8 +25,12 @@ public class EmployeePayrollDatabaseService {
         return connection;
     }
 
-    public List<EmployeePayrollData> readData() throws EmployeePayrollException {
-        String sql = "SELECT * FROM EmployeePayroll";
+    public List<EmployeePayrollData> readData(LocalDate start, LocalDate end) throws EmployeePayrollException {
+        String sql = null;
+        if(start != null)
+            sql = String.format("SELECT * FROM EmployeePayroll WHERE StartDate BETWEEN '%s' AND '%s';", Date.valueOf(start), Date.valueOf(end));
+        if(start == null)
+            sql = "SELECT * FROM EmployeePayroll";
         List<EmployeePayrollData> employeePayrollData = new ArrayList();
         try(Connection connection= this.getConnection()) {
             Statement statement = connection.createStatement();
