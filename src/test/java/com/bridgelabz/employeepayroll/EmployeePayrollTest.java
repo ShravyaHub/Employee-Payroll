@@ -30,4 +30,64 @@ public class EmployeePayrollTest {
         Assert.assertEquals(2, employeePayrollData.size());
     }
 
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnSumOfFemaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(3600000, employeePayrollService.readEmployeePayrollData("SUM", "Female"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnSumOfMaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(600000, employeePayrollService.readEmployeePayrollData("SUM", "Male"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnAverageOfFemaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(1200000, employeePayrollService.readEmployeePayrollData("AVG", "Female"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnAverageOfMaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(300000, employeePayrollService.readEmployeePayrollData("AVG", "Male"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnMinimumOfFemaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(100000, employeePayrollService.readEmployeePayrollData("MIN", "Female"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnMinimumOfMaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(100000, employeePayrollService.readEmployeePayrollData("MIN", "Male"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnMaximumOfFemaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(3000000, employeePayrollService.readEmployeePayrollData("MAX", "Female"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnMaximumOfMaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(500000, employeePayrollService.readEmployeePayrollData("MAX", "Male"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnNumberOfFemaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(3, employeePayrollService.readEmployeePayrollData("COUNT", "Female"));
+    }
+
+    @Test
+    public void givenEmployeePayrollData_ShouldReturnNumberOfMaleEmployeeSalaries() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        Assert.assertEquals(2, employeePayrollService.readEmployeePayrollData("COUNT", "Male"));
+    }
+
 }
