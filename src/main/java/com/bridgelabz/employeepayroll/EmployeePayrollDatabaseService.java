@@ -8,8 +8,10 @@ import java.util.List;
 public class EmployeePayrollDatabaseService {
 
     private PreparedStatement employeePayrollPreparedStatement;
-    EmployeePayrollDatabaseService() {
-
+    private static EmployeePayrollDatabaseService employeePayrollDatabaseService;
+    public static EmployeePayrollDatabaseService getInstance() {
+        if(employeePayrollDatabaseService == null) employeePayrollDatabaseService = new EmployeePayrollDatabaseService();
+        return employeePayrollDatabaseService;
     }
 
     private Connection getConnection() throws SQLException {
