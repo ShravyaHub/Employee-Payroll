@@ -10,11 +10,11 @@ public class EmployeePayrollService {
 
     private List<EmployeePayrollData> employeePayrollData;
 
-    public void updateEmployeeSalary(String name, double salary) {
+    public void updateEmployeeSalary(String name, double salary) throws EmployeePayrollException {
         int result = new EmployeePayrollDatabaseService().updateEmployeeData(name, salary);
-        if(result == 0) return;
+        if (result == 0) throw new EmployeePayrollException("Salary update failed", EmployeePayrollException.ExceptionType.UPDATE_FAILED);
         EmployeePayrollData employeePayrollData = this.getEmployeePayrollData(name);
-        if(employeePayrollData != null) employeePayrollData.salary = salary;
+        if (employeePayrollData != null) employeePayrollData.salary = salary;
     }
 
     private EmployeePayrollData getEmployeePayrollData(String name) {
@@ -24,15 +24,23 @@ public class EmployeePayrollService {
                 .orElse(null);
     }
 
-    public boolean checkEmployeePayrollInSyncWithDatabase(String name) {
-        List<EmployeePayrollData> employeePayrollData = new EmployeePayrollDatabaseService().getEmployeePayrollData(name);
-        return employeePayrollData.get(0).equals(getEmployeePayrollData(name));
+    public boolean checkEmployeePayrollInSyncWithDatabase(String name) throws EmployeePayrollException {
+        try {
+            List<EmployeePayrollData> employeePayrollData = new EmployeePayrollDatabaseService().getEmployeePayrollData(name);
+            return employeePayrollData.get(0).equals(getEmployeePayrollData(name));
+        } catch (EmployeePayrollException employeePayrollException) {
+            throw new EmployeePayrollException("Cannot execute query", EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
+        }
     }
 
-    public List<EmployeePayrollData> readEmployeePayrollData(IOService ioService) {
-        if(ioService.equals(IOService.DATABASE_IO))
-            return this.employeePayrollData = new EmployeePayrollDatabaseService().readData();
-        return this.employeePayrollData;
+    public List<EmployeePayrollData> readEmployeePayrollData(IOService ioService) throws EmployeePayrollException {
+        try {
+            if (ioService.equals(IOService.DATABASE_IO))
+                return this.employeePayrollData = new EmployeePayrollDatabaseService().readData();
+            return this.employeePayrollData;
+        } catch (EmployeePayrollException employeePayrollException) {
+            throw new EmployeePayrollException("Cannot execute query", EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
+        }
     }
 
 }
