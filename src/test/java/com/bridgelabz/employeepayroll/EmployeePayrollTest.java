@@ -2,6 +2,8 @@ package com.bridgelabz.employeepayroll;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.time.LocalDate;
 import java.util.List;
 import static com.bridgelabz.employeepayroll.EmployeePayrollService.IOService.DATABASE_IO;
 
@@ -26,7 +28,9 @@ public class EmployeePayrollTest {
     @Test
     public void givenEmployeePayrollData_ShouldNumberOfEmployeesWithinDateRange() throws EmployeePayrollException {
         EmployeePayrollService employeePayrollService = new EmployeePayrollService();
-        List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(DATABASE_IO, "2020-03-01", "2020-04-30");
+        LocalDate start = LocalDate.of(2020, 03, 01);
+        LocalDate end = LocalDate.of(2020, 04, 30);
+        List<EmployeePayrollData> employeePayrollData = employeePayrollService.readEmployeePayrollData(DATABASE_IO, start, end);
         Assert.assertEquals(2, employeePayrollData.size());
     }
 
@@ -88,6 +92,15 @@ public class EmployeePayrollTest {
     public void givenEmployeePayrollData_ShouldReturnNumberOfMaleEmployeeSalaries() throws EmployeePayrollException {
         EmployeePayrollService employeePayrollService = new EmployeePayrollService();
         Assert.assertEquals(2, employeePayrollService.readEmployeePayrollData("COUNT", "Male"));
+    }
+
+    @Test
+    public void givenNewEmployee_WhenAdded_ShouldSyncWithDatabase() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        employeePayrollService.readEmployeePayrollData(DATABASE_IO);
+        employeePayrollService.addNewEmployee("Raj", 100000, LocalDate.now(), "Male");
+        boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDatabase("Raj");
+        Assert.assertTrue(result);
     }
 
 }
