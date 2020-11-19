@@ -147,7 +147,12 @@ public class EmployeePayrollDatabaseService {
             }
             employeePayrollData = new EmployeePayrollData(employeeID, name, salary, startDate);
         } catch (SQLException sqlException) {
-            throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
+            try {
+                connection.rollback();
+                return  employeePayrollData;
+            } catch (SQLException sqlException2) {
+                throw new EmployeePayrollException(sqlException2.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
+            }
         }
         try(Statement statement = connection.createStatement()) {
             double deductions = salary * 0.2;
@@ -160,7 +165,20 @@ public class EmployeePayrollDatabaseService {
                 employeePayrollData = new EmployeePayrollData(employeeID, name, salary, startDate);
             }
         } catch (SQLException sqlException) {
+            try {
+                connection.rollback();
+            } catch (SQLException sqlException2) {
+                throw new EmployeePayrollException(sqlException2.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
+            }
             throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
+        } finally {
+            if(connection != null)  {
+                try {
+                    connection.close();
+                } catch (SQLException sqlException) {
+                    throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
+                }
+            }
         }
         return employeePayrollData;
     }
