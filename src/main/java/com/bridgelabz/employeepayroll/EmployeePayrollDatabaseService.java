@@ -129,4 +129,40 @@ public class EmployeePayrollDatabaseService {
         return employeePayrollData;
     }
 
+    public EmployeePayrollData addNewEmployeeToPayrollDetails(String name, double salary, LocalDate startDate, String gender) throws EmployeePayrollException {
+        int employeeID = -1;
+        Connection connection = null;
+        EmployeePayrollData employeePayrollData = null;
+        try {
+            connection = this.getConnection();
+        } catch(SQLException sqlException) {
+            throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
+        }
+        try(Statement statement = connection.createStatement()) {
+            String sql = String.format("INSERT INTO EmployeePayroll(Name, Salary, StartDate, Gender) VALUES ('%s', '%s', '%s', '%s')", name, salary, Date.valueOf(startDate), gender);
+            int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
+            if(rowAffected == 1) {
+                ResultSet resultSet = statement.getGeneratedKeys();
+                if(resultSet.next()) employeeID = resultSet.getInt(1);
+            }
+            employeePayrollData = new EmployeePayrollData(employeeID, name, salary, startDate);
+        } catch (SQLException sqlException) {
+            throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
+        }
+        try(Statement statement = connection.createStatement()) {
+            double deductions = salary * 0.2;
+            double taxablePay = salary - deductions;
+            double tax = taxablePay * 0.1;
+            double netPay = salary - tax;
+            String sql = String.format("INSERT INTO PayrollDetails(EmployeeID, BasicPay, Deductions, TaxablePay, Tax, NetPay) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')", employeeID, salary, deductions, taxablePay, tax, netPay);
+            int rowAffected = statement.executeUpdate(sql);
+            if(rowAffected == 1) {
+                employeePayrollData = new EmployeePayrollData(employeeID, name, salary, startDate);
+            }
+        } catch (SQLException sqlException) {
+            throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
+        }
+        return employeePayrollData;
+    }
+
 }
