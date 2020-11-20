@@ -3,6 +3,7 @@ package com.bridgelabz.employeepayroll;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import static com.bridgelabz.employeepayroll.EmployeePayrollService.IOService.DATABASE_IO;
@@ -98,8 +99,17 @@ public class EmployeePayrollTest {
     public void givenNewEmployee_WhenAdded_ShouldSyncWithDatabase() throws EmployeePayrollException {
         EmployeePayrollService employeePayrollService = new EmployeePayrollService();
         employeePayrollService.readEmployeePayrollData(DATABASE_IO);
-        employeePayrollService.addNewEmployee("Raj", 100000, LocalDate.now(), "Male", "Sales");
+        employeePayrollService.addNewEmployee("Raj", 100000, LocalDate.now(), "Male", 3);
         boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDatabase("Raj");
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void givenEmployeeName_WhenRemoved_ShouldRemoveEmployeeFromList() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        employeePayrollService.readEmployeePayrollData(DATABASE_IO);
+        employeePayrollService.deleteEmployee("Raj");
+        boolean result = employeePayrollService.checkIfDeleted("Raj");
         Assert.assertTrue(result);
     }
 

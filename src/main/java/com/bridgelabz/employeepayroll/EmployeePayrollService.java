@@ -71,4 +71,15 @@ public class EmployeePayrollService {
         employeePayrollData.add(employeePayrollDatabaseService.addNewEmployee(name, salary, startDate, gender, department));
     }
 
+    public void deleteEmployee(String name) throws EmployeePayrollException {
+        this.employeePayrollData = this.employeePayrollDatabaseService.deleteEmployee(name);
+    }
+
+    public boolean checkIfDeleted(String name) throws EmployeePayrollException {
+        List<EmployeePayrollData> employeePayrollData = employeePayrollDatabaseService.getEmployeePayrollData(name);
+        if(getEmployeePayrollData(name) == null && employeePayrollData.size() == 0)
+            return true;
+        return false;
+    }
+
 }

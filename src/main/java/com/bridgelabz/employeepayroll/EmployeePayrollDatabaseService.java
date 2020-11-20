@@ -114,7 +114,6 @@ public class EmployeePayrollDatabaseService {
     }
 
     public EmployeePayrollData addNewEmployee(String name, double salary, LocalDate startDate, String gender, int department) throws EmployeePayrollException {
-        List<String> departments= new ArrayList<>(Arrays.asList("Marketing", "Technology", "Sales"));
         int employeeID = -1;
         Connection connection;
         EmployeePayrollData employeePayrollData = null;
@@ -124,18 +123,17 @@ public class EmployeePayrollDatabaseService {
             throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
         }
         try(Statement statement = connection.createStatement()) {
-            String sql = String.format("INSERT INTO EmployeePayroll(Name, Salary, StartDate, Gender, DepartmentID) VALUES ('%s', '%s', '%s', '%s', '%s')", name, salary, Date.valueOf(startDate), gender, departments.indexOf(department));
+            String sql = String.format("INSERT INTO EmployeePayroll(Name, Salary, StartDate, Gender, DepartmentID) VALUES ('%s', '%s', '%s', '%s', '%s')", name, salary, Date.valueOf(startDate), gender, department);
             int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
             if(rowAffected == 1) {
                 ResultSet resultSet = statement.getGeneratedKeys();
                 if(resultSet.next()) employeeID = resultSet.getInt(1);
             }
-            employeePayrollData = new EmployeePayrollData(employeeID, name, salary, startDate, department);
         } catch (SQLException sqlException) {
             throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
         }
         try(Statement statement = connection.createStatement()) {
-            String sql = String.format("INSERT INTO EmployeeDepartment(EmployeeID, DepartmentID) VALUES ('%s', '%s')", employeeID, departments.indexOf(department));
+            String sql = String.format("INSERT INTO EmployeeDepartment(EmployeeID, DepartmentID) VALUES ('%s', '%s')", employeeID, department);
             statement.executeUpdate(sql);
         } catch (SQLException sqlException) {
             throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
@@ -163,6 +161,17 @@ public class EmployeePayrollDatabaseService {
             }
         }
         return employeePayrollData;
+    }
+
+    public List<EmployeePayrollData> deleteEmployee(String name) throws EmployeePayrollException {
+        String sql = String.format("UPDATE EmployeePayroll SET is_active = false WHERE Name = '%s';", name);
+        try(Connection connection = this.getConnection()){
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(sql);
+            return this.readData();
+        } catch (SQLException sqlException) {
+            throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
+        }
     }
 
 }
