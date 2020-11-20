@@ -1,10 +1,8 @@
 package com.bridgelabz.employeepayroll;
 
-import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class EmployeePayrollDatabaseService {
@@ -38,7 +36,7 @@ public class EmployeePayrollDatabaseService {
     }
 
     private List<EmployeePayrollData> getEmployeePayrollDataUsingDatabase(String sql) throws EmployeePayrollException {
-        List<EmployeePayrollData> employeePayrollData = new ArrayList();
+        List<EmployeePayrollData> employeePayrollData;
         try(Connection connection= this.getConnection()) {
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(sql);
@@ -113,7 +111,7 @@ public class EmployeePayrollDatabaseService {
         }
     }
 
-    public EmployeePayrollData addNewEmployee(String name, double salary, LocalDate startDate, String gender, int department) throws EmployeePayrollException {
+    public EmployeePayrollData addNewEmployee(String name, double salary, LocalDate startDate, String gender, int department, boolean active) throws EmployeePayrollException {
         int employeeID = -1;
         Connection connection;
         EmployeePayrollData employeePayrollData = null;
@@ -123,7 +121,7 @@ public class EmployeePayrollDatabaseService {
             throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
         }
         try(Statement statement = connection.createStatement()) {
-            String sql = String.format("INSERT INTO EmployeePayroll(Name, Salary, StartDate, Gender, DepartmentID) VALUES ('%s', '%s', '%s', '%s', '%s')", name, salary, Date.valueOf(startDate), gender, department);
+            String sql = String.format("INSERT INTO EmployeePayroll(Name, Salary, StartDate, Gender, DepartmentID, is_active) VALUES ('%s', '%s', '%s', '%s', '%s', %s)", name, salary, Date.valueOf(startDate), gender, department, active);
             int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
             if(rowAffected == 1) {
                 ResultSet resultSet = statement.getGeneratedKeys();
@@ -152,12 +150,10 @@ public class EmployeePayrollDatabaseService {
         } catch (SQLException sqlException) {
             throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
         } finally {
-            if(connection != null)  {
-                try {
-                    connection.close();
-                } catch (SQLException sqlException) {
-                    throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
-                }
+            try {
+                connection.close();
+            } catch (SQLException sqlException) {
+                throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
             }
         }
         return employeePayrollData;
