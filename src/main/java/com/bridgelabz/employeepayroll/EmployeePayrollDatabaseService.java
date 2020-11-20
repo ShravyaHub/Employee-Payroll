@@ -4,6 +4,7 @@ import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class EmployeePayrollDatabaseService {
@@ -111,27 +112,10 @@ public class EmployeePayrollDatabaseService {
         }
     }
 
-    public EmployeePayrollData addNewEmployee(String name, double salary, LocalDate startDate, String gender) throws EmployeePayrollException {
+    public EmployeePayrollData addNewEmployee(String name, double salary, LocalDate startDate, String gender, String deparmentName) throws EmployeePayrollException {
+        List<String> departments= new ArrayList<>(Arrays.asList("Marketing", "Technology", "Sales"));
         int employeeID = -1;
-        EmployeePayrollData employeePayrollData = null;
-        String sql = String.format("INSERT INTO EmployeePayroll(Name, Salary, StartDate, Gender) VALUES ('%s', '%s', '%s', '%s')", name, salary, Date.valueOf(startDate), gender);
-        try(Connection connection = this.getConnection()) {
-            Statement statement = connection.createStatement();
-            int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
-            if(rowAffected == 1) {
-                ResultSet resultSet = statement.getGeneratedKeys();
-                if(resultSet.next()) employeeID = resultSet.getInt(1);
-            }
-            employeePayrollData = new EmployeePayrollData(employeeID, name, salary, startDate);
-        } catch (SQLException sqlException) {
-            throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
-        }
-        return employeePayrollData;
-    }
-
-    public EmployeePayrollData addNewEmployeeToPayrollDetails(String name, double salary, LocalDate startDate, String gender) throws EmployeePayrollException {
-        int employeeID = -1;
-        Connection connection = null;
+        Connection connection;
         EmployeePayrollData employeePayrollData = null;
         try {
             connection = this.getConnection();
@@ -139,7 +123,7 @@ public class EmployeePayrollDatabaseService {
             throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
         }
         try(Statement statement = connection.createStatement()) {
-            String sql = String.format("INSERT INTO EmployeePayroll(Name, Salary, StartDate, Gender) VALUES ('%s', '%s', '%s', '%s')", name, salary, Date.valueOf(startDate), gender);
+            String sql = String.format("INSERT INTO EmployeePayroll(Name, Salary, StartDate, Gender, DepartmentID) VALUES ('%s', '%s', '%s', '%s', '%s')", name, salary, Date.valueOf(startDate), gender, departments.indexOf(deparmentName));
             int rowAffected = statement.executeUpdate(sql, statement.RETURN_GENERATED_KEYS);
             if(rowAffected == 1) {
                 ResultSet resultSet = statement.getGeneratedKeys();
@@ -147,12 +131,14 @@ public class EmployeePayrollDatabaseService {
             }
             employeePayrollData = new EmployeePayrollData(employeeID, name, salary, startDate);
         } catch (SQLException sqlException) {
-            try {
-                connection.rollback();
-                return  employeePayrollData;
-            } catch (SQLException sqlException2) {
-                throw new EmployeePayrollException(sqlException2.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
-            }
+            throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
+        }
+        try(Statement statement = connection.createStatement()) {
+            String sql = String.format("INSERT INTO EmployeeDepartment(EmployeeID, DepartmentID) VALUES ('%s', '%s')", employeeID, departments.indexOf(deparmentName));
+            statement.executeUpdate(sql);
+        } catch (SQLException sqlException) {
+            throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
+
         }
         try(Statement statement = connection.createStatement()) {
             double deductions = salary * 0.2;
@@ -165,11 +151,6 @@ public class EmployeePayrollDatabaseService {
                 employeePayrollData = new EmployeePayrollData(employeeID, name, salary, startDate);
             }
         } catch (SQLException sqlException) {
-            try {
-                connection.rollback();
-            } catch (SQLException sqlException2) {
-                throw new EmployeePayrollException(sqlException2.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
-            }
             throw new EmployeePayrollException(sqlException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
         } finally {
             if(connection != null)  {
