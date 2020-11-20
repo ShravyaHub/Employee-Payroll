@@ -94,13 +94,13 @@ public class EmployeePayrollTest {
         Assert.assertEquals(2, employeePayrollService.readEmployeePayrollData("COUNT", "Male"));
     }
 
-//    @Test
-//    public void givenNewEmployee_WhenAdded_ShouldSyncWithDatabase() throws EmployeePayrollException {
-//        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
-//        employeePayrollService.readEmployeePayrollData(DATABASE_IO);
-//        employeePayrollService.addNewEmployee("Raj", 100000, LocalDate.now(), "Male", "Sales");
-//        boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDatabase("Raj");
-//        Assert.assertTrue(result);
-//    }
+    @Test
+    public void givenNewEmployee_WhenAdded_ShouldSyncWithDatabase() throws EmployeePayrollException {
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        employeePayrollService.readEmployeePayrollData(DATABASE_IO);
+        employeePayrollService.addNewEmployee("Raj", 100000, LocalDate.now(), "Male", "Sales");
+        boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDatabase("Raj");
+        Assert.assertTrue(result);
+    }
 
 }
