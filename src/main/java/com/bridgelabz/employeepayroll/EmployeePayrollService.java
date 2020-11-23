@@ -1,12 +1,38 @@
 package com.bridgelabz.employeepayroll;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class EmployeePayrollService {
 
-    public void addEmployeeToPayrollWithThreads(List<EmployeePayrollData> employeePayrollData) {
+    public void addEmployeeToPayrollWithThreads(List<EmployeePayrollData> employeePayrollDataList) {
+        Map<Integer, Boolean> employeeMap = new HashMap<>();
+        for(int index = 0; index < employeePayrollDataList.size(); index++) {
+            int finalIndex = index;
+            Runnable task = () -> {
+                employeeMap.put(employeePayrollDataList.hashCode(), false);
+                System.out.println("Employee being added: " + Thread.currentThread().getName());
+                try {
+                    this.addNewEmployee(employeePayrollDataList.get(finalIndex).name, employeePayrollDataList.get(finalIndex).salary, employeePayrollDataList.get(finalIndex).startDate, employeePayrollDataList.get(finalIndex).gender, employeePayrollDataList.get(finalIndex).department, employeePayrollDataList.get(finalIndex).is_active);
+                } catch (EmployeePayrollException employeePayrollException) {
+                    employeePayrollException.printStackTrace();
+                }
+                employeeMap.put(employeePayrollDataList.hashCode(), true);
+                System.out.println("Employee added: " + Thread.currentThread().getName());
+            };
+            Thread thread = new Thread(task, employeePayrollDataList.get(index).name);
+            thread.start();
+        }
+        while (employeeMap.containsValue(false) && employeeMap.size() != 6) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException interruptedException) {
 
+            }
+        }
+        System.out.println(employeePayrollData);
     }
 
     public enum IOService {
