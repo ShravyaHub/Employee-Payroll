@@ -5,6 +5,10 @@ import java.util.List;
 
 public class EmployeePayrollService {
 
+    public void addEmployeeToPayrollWithThreads(List<EmployeePayrollData> employeePayrollData) {
+
+    }
+
     public enum IOService {
         DATABASE_IO
     }
@@ -67,7 +71,7 @@ public class EmployeePayrollService {
         }
     }
 
-    public void addNewEmployee(String name, double salary, LocalDate startDate, String gender, int department, boolean active) throws EmployeePayrollException {
+    public void addNewEmployee(String name, double salary, LocalDate startDate, String gender, int department, int active) throws EmployeePayrollException {
         employeePayrollData.add(employeePayrollDatabaseService.addNewEmployee(name, salary, startDate, gender, department, active));
     }
 
@@ -79,5 +83,15 @@ public class EmployeePayrollService {
         List<EmployeePayrollData> employeePayrollData = employeePayrollDatabaseService.getEmployeePayrollData(name);
         return getEmployeePayrollData(name) == null && employeePayrollData.size() == 0;
     }
+
+    public void addEmployeesToPayrollList(List<EmployeePayrollData> employeePayrollList) throws EmployeePayrollException {
+        for(int i = 0; i < employeePayrollList.size(); i++) {
+            System.out.println("Employee being added: " + employeePayrollData.get(i).name);
+            this.addNewEmployee(employeePayrollList.get(i).name, employeePayrollList.get(i).salary, employeePayrollList.get(i).startDate, employeePayrollList.get(i).gender, employeePayrollList.get(i).department, employeePayrollList.get(i).is_active);
+            System.out.println("Employee added: " + employeePayrollData.get(i).name);
+        }
+    }
+
+
 
 }
