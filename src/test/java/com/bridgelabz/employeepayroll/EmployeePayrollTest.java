@@ -2,7 +2,11 @@ package com.bridgelabz.employeepayroll;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import static com.bridgelabz.employeepayroll.EmployeePayrollService.IOService.DATABASE_IO;
 
@@ -97,7 +101,7 @@ public class EmployeePayrollTest {
     public void givenNewEmployee_WhenAdded_ShouldSyncWithDatabase() throws EmployeePayrollException {
         EmployeePayrollService employeePayrollService = new EmployeePayrollService();
         employeePayrollService.readEmployeePayrollData(DATABASE_IO);
-        employeePayrollService.addNewEmployee("Raj", 100000, LocalDate.now(), "Male", 3, true);
+        employeePayrollService.addNewEmployee("Raj", 100000, LocalDate.now(), "Male", 3, 1);
         boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDatabase("Raj");
         Assert.assertTrue(result);
     }
@@ -109,6 +113,30 @@ public class EmployeePayrollTest {
         employeePayrollService.deleteEmployee("Raj");
         boolean result = employeePayrollService.checkIfDeleted("Raj");
         Assert.assertTrue(result);
+    }
+
+    @Test
+    public void given6Employees_WhenAdded_ShouldMatchNumberOfEntries() throws EmployeePayrollException {
+        EmployeePayrollData[] arrayOfEmployees = {
+                new EmployeePayrollData(0, "Jeff", 100, LocalDate.now(), "Male", 1, 1),
+                new EmployeePayrollData(0, "Lasya", 200, LocalDate.now(), "Female", 1, 1),
+                new EmployeePayrollData(0, "Mark", 300, LocalDate.now(), "Male", 1, 1),
+                new EmployeePayrollData(0, "Cam", 120, LocalDate.now(), "Female", 1, 1),
+                new EmployeePayrollData(0, "Noah", 400, LocalDate.now(), "Male", 1, 1),
+                new EmployeePayrollData(0, "Mary", 600, LocalDate.now(), "Female", 1, 1),
+        };
+
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        employeePayrollService.readEmployeePayrollData(DATABASE_IO);
+        Instant start = Instant.now();
+        employeePayrollService.addEmployeesToPayrollList(Arrays.asList(arrayOfEmployees));
+        Instant end = Instant.now();
+        System.out.println("Duration without thread: " + Duration.between(start, end));
+        Instant threadStart = Instant.now();
+        employeePayrollService.addEmployeeToPayrollWithThreads(Arrays.asList(arrayOfEmployees));
+        Instant threadEnd = Instant.now();
+        System.out.println("Duration with thread: " + Duration.between(threadStart, threadEnd));
+        Assert.assertEquals(20, new EmployeePayrollService().readEmployeePayrollData(DATABASE_IO).size());
     }
 
 }

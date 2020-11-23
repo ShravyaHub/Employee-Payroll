@@ -111,7 +111,7 @@ public class EmployeePayrollDatabaseService {
         }
     }
 
-    public EmployeePayrollData addNewEmployee(String name, double salary, LocalDate startDate, String gender, int department, boolean active) throws EmployeePayrollException {
+    public EmployeePayrollData addNewEmployee(String name, double salary, LocalDate startDate, String gender, int department, int active) throws EmployeePayrollException {
         int employeeID = -1;
         Connection connection;
         EmployeePayrollData employeePayrollData = null;
