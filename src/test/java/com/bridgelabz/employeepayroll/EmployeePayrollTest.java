@@ -139,4 +139,26 @@ public class EmployeePayrollTest {
         Assert.assertEquals(66, new EmployeePayrollService().readEmployeePayrollData(DATABASE_IO).size());
     }
 
+    @Test
+    public void givenEmployeeData_WhenUpdated_ShouldSyncWithDatabase() throws EmployeePayrollException {
+        EmployeePayrollData[] arrayOfEmployees = {
+                new EmployeePayrollData("Jeff", 1000.00),
+                new EmployeePayrollData("Lasya", 2000.00),
+                new EmployeePayrollData("Mark", 3000.00),
+        };
+
+        EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+        employeePayrollService.readEmployeePayrollData(DATABASE_IO);
+        Instant threadStart = Instant.now();
+        employeePayrollService.updateEmployeeDetailsWithThreads(Arrays.asList(arrayOfEmployees));
+        Instant threadEnd = Instant.now();
+        System.out.println("Duration with thread: " + Duration.between(threadStart, threadEnd));
+        boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDatabase("Jeff");
+        Assert.assertTrue(result);
+        result = employeePayrollService.checkEmployeePayrollInSyncWithDatabase("Lasya");
+        Assert.assertTrue(result);
+        result = employeePayrollService.checkEmployeePayrollInSyncWithDatabase("Mark");
+        Assert.assertTrue(result);
+    }
+
 }
