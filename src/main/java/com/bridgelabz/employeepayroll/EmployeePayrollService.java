@@ -35,6 +35,34 @@ public class EmployeePayrollService {
         System.out.println(employeePayrollData);
     }
 
+    public void updateEmployeeDetailsWithThreads(List<EmployeePayrollData> employeePayrollDataList) {
+        Map<Integer, Boolean> employeeMap = new HashMap<>();
+        for(int index = 0; index < employeePayrollDataList.size(); index++) {
+            int finalIndex = index;
+            Runnable task = () -> {
+                employeeMap.put(employeePayrollDataList.hashCode(), false);
+                System.out.println("Employee being updated: " + Thread.currentThread().getName());
+                try {
+                    this.updateEmployeeSalary(employeePayrollDataList.get(finalIndex).name, employeePayrollDataList.get(finalIndex).salary);
+                } catch (EmployeePayrollException employeePayrollException) {
+                    employeePayrollException.printStackTrace();
+                }
+                employeeMap.put(employeePayrollDataList.hashCode(), true);
+                System.out.println("Employee updated: " + Thread.currentThread().getName());
+            };
+            Thread thread = new Thread(task, employeePayrollDataList.get(index).name);
+            thread.start();
+        }
+        while (employeeMap.containsValue(false) && employeeMap.size() != 6) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException interruptedException) {
+
+            }
+        }
+        System.out.println(employeePayrollData);
+    }
+
     public enum IOService {
         DATABASE_IO
     }
