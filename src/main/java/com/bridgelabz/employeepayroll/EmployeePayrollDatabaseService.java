@@ -7,6 +7,7 @@ import java.util.List;
 
 public class EmployeePayrollDatabaseService {
 
+    private int connectionCounter = 0;
     private PreparedStatement employeePayrollPreparedStatement;
     private static EmployeePayrollDatabaseService employeePayrollDatabaseService;
     public static EmployeePayrollDatabaseService getInstance() {
@@ -15,13 +16,15 @@ public class EmployeePayrollDatabaseService {
     }
 
     private Connection getConnection() throws SQLException {
+        connectionCounter++;
         String jdbcURL = "jdbc:mysql://localhost:3306/EmployeePayrollService?useSSL=false";
         String username = "root";
         String password = "shravya";
         Connection connection;
-        System.out.println("Connecting to database: " + jdbcURL);
+        System.out.println("Processing thread: " + Thread.currentThread().getName() + ", connecting to database with ID: " + connectionCounter);
         connection = DriverManager.getConnection(jdbcURL, username, password);
         System.out.println("Connection is successful: " + connection);
+        System.out.println("Processing thread: " + Thread.currentThread().getName() + ", ID: " + connectionCounter + ", connection is successful: " + connection);
         return connection;
     }
 
