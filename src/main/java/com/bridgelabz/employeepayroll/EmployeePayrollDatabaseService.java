@@ -23,7 +23,6 @@ public class EmployeePayrollDatabaseService {
         Connection connection;
         System.out.println("Processing thread: " + Thread.currentThread().getName() + ", connecting to database with ID: " + connectionCounter);
         connection = DriverManager.getConnection(jdbcURL, username, password);
-        System.out.println("Connection is successful: " + connection);
         System.out.println("Processing thread: " + Thread.currentThread().getName() + ", ID: " + connectionCounter + ", connection is successful: " + connection);
         return connection;
     }
