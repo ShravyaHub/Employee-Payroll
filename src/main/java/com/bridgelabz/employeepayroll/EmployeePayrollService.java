@@ -156,38 +156,42 @@ public class EmployeePayrollService {
         }
     }
 
-    public int addEmployeeToJSONServer(int id, String name, double salary) throws JSONException {
-        RestAssured.baseURI ="http://localhost:3000";
-        RequestSpecification request = given();
-        JSONObject requestParams = new JSONObject();
-        requestParams.put("id", id);
-        requestParams.put("name", name);
-        requestParams.put("salary", salary);
-        request.header("Content-Type", "application/json");
-        request.body(requestParams.toString());
-        Response response = request.post("/employees");
-        return response.getStatusCode();
+    public int addEmployeeToJSONServer(int id, String name, double salary) throws EmployeePayrollException {
+        try {
+            RestAssured.baseURI = "http://localhost:3000";
+            RequestSpecification request = given();
+            JSONObject requestParams = new JSONObject();
+            requestParams.put("id", id);
+            requestParams.put("name", name);
+            requestParams.put("salary", salary);
+            request.header("Content-Type", "application/json");
+            request.body(requestParams.toString());
+            Response response = request.post("/employees");
+            return response.getStatusCode();
+        } catch (JSONException jsonException) {
+            throw new EmployeePayrollException(jsonException.getMessage(), EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
+        }
     }
 
     public List<Integer> addEmployeeToJSONServer(List<EmployeePayrollData> employeePayrollDataList) throws EmployeePayrollException {
-        List<Integer> statusCode = new ArrayList<>();
-        Map<Integer, Boolean> employeeMap = new HashMap<>();
-        for(int index = 0; index < employeePayrollDataList.size(); index++) {
-            int finalIndex = index;
-            employeeMap.put(employeePayrollDataList.hashCode(), false);
-            System.out.println("Employee being added: " + Thread.currentThread().getName());
-            try {
+        try {
+            List<Integer> statusCode = new ArrayList<>();
+            Map<Integer, Boolean> employeeMap = new HashMap<>();
+            for (int index = 0; index < employeePayrollDataList.size(); index++) {
+                int finalIndex = index;
+                employeeMap.put(employeePayrollDataList.hashCode(), false);
+                System.out.println("Employee being added: " + Thread.currentThread().getName());
                 statusCode.add(this.addEmployeeToJSONServer(employeePayrollDataList.get(finalIndex).id, employeePayrollDataList.get(finalIndex).name, employeePayrollDataList.get(finalIndex).salary));
-            } catch (JSONException jsonException) {
-                new EmployeePayrollException(jsonException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_ADD_DATA_TO_SERVER);
+                employeeMap.put(employeePayrollDataList.hashCode(), true);
+                System.out.println("Employee added: " + Thread.currentThread().getName());
             }
-            employeeMap.put(employeePayrollDataList.hashCode(), true);
-            System.out.println("Employee added: " + Thread.currentThread().getName());
+            return statusCode;
+        } catch (EmployeePayrollException employeePayrollException) {
+            throw new EmployeePayrollException("Cannot connect to JSON server", EmployeePayrollException.ExceptionType.CONNECTION_FAIL);
         }
-        return statusCode;
     }
 
-    public int updateEmployeeDataInJSONServer(int id, double salary) throws JSONException {
+    public int updateEmployeeDataInJSONServer(int id, double salary) throws EmployeePayrollException {
         String requestBody = "{\n\"salary\": \"" + salary + "\" \n}";
         RestAssured.baseURI = "http://localhost:3000";
         Response response = given()
@@ -198,6 +202,12 @@ public class EmployeePayrollService {
                 .patch("/employees/" + id)
                 .then()
                 .extract().response();
+        return response.getStatusCode();
+    }
+
+    public int getDataFromJSONServer() {
+        Response response = RestAssured.get("http://localhost:3000/employees");
+        System.out.println(response.getBody().asString());
         return response.getStatusCode();
     }
 
