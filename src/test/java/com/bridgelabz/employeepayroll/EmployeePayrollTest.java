@@ -1,5 +1,6 @@
 package com.bridgelabz.employeepayroll;
 
+import io.restassured.RestAssured;
 import org.junit.Assert;
 import org.junit.Test;
 
