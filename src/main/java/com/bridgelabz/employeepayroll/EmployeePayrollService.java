@@ -1,15 +1,19 @@
 package com.bridgelabz.employeepayroll;
 
+import com.google.gson.Gson;
 import io.restassured.*;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.restassured.RestAssured.given;
 
 public class EmployeePayrollService {
 
@@ -87,7 +91,7 @@ public class EmployeePayrollService {
         if (employeePayrollData != null) employeePayrollData.salary = salary;
     }
 
-    private EmployeePayrollData getEmployeePayrollData(String name) {
+    EmployeePayrollData getEmployeePayrollData(String name) {
         return this.employeePayrollData.stream()
                 .filter(employeePayrollDataItem -> employeePayrollDataItem.name.equals(name))
                 .findFirst()
@@ -154,7 +158,7 @@ public class EmployeePayrollService {
 
     public int addEmployeeToJSONServer(int id, String name, double salary) throws JSONException {
         RestAssured.baseURI ="http://localhost:3000";
-        RequestSpecification request = RestAssured.given();
+        RequestSpecification request = given();
         JSONObject requestParams = new JSONObject();
         requestParams.put("id", id);
         requestParams.put("name", name);
@@ -181,6 +185,20 @@ public class EmployeePayrollService {
             System.out.println("Employee added: " + Thread.currentThread().getName());
         }
         return statusCode;
+    }
+
+    public int updateEmployeeDataInJSONServer(int id, double salary) throws JSONException {
+        String requestBody = "{\n\"salary\": \"" + salary + "\" \n}";
+        RestAssured.baseURI = "http://localhost:3000";
+        Response response = given()
+                .header("Content-type", "application/json")
+                .and()
+                .body(requestBody)
+                .when()
+                .patch("/employees/" + id)
+                .then()
+                .extract().response();
+        return response.getStatusCode();
     }
 
 }
