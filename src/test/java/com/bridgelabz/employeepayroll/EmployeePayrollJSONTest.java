@@ -55,4 +55,9 @@ public class EmployeePayrollJSONTest {
         assertEquals(200, new EmployeePayrollService().getDataFromJSONServer());
     }
 
+    @Test
+    public void givenEmployeePayrollData_WhenDeleted_ShouldValidateRequestResponseReceived() {
+        assertEquals(200, new EmployeePayrollService().deleteEmployeeFromJSONServer(5));
+    }
+
 }
