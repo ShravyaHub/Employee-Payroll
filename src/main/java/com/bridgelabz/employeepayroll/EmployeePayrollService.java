@@ -211,4 +211,13 @@ public class EmployeePayrollService {
         return response.getStatusCode();
     }
 
+    public int deleteEmployeeFromJSONServer(int id) {
+        JSONObject request = new JSONObject();
+        Response response = given().
+                body(request.toString()).
+                when().
+                delete("http://localhost:3000/employees/" + id);
+        return response.getStatusCode();
+    }
+
 }
