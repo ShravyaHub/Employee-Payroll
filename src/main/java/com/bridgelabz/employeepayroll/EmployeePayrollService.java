@@ -1,5 +1,10 @@
 package com.bridgelabz.employeepayroll;
 
+import io.restassured.*;
+import io.restassured.response.Response;
+import io.restassured.specification.RequestSpecification;
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -7,7 +12,7 @@ import java.util.Map;
 
 public class EmployeePayrollService {
 
-    public void addEmployeeToPayrollWithThreads(List<EmployeePayrollData> employeePayrollDataList) {
+    public void addEmployeeToPayrollWithThreads(List<EmployeePayrollData> employeePayrollDataList) throws EmployeePayrollException {
         Map<Integer, Boolean> employeeMap = new HashMap<>();
         for(int index = 0; index < employeePayrollDataList.size(); index++) {
             int finalIndex = index;
@@ -17,7 +22,7 @@ public class EmployeePayrollService {
                 try {
                     this.addNewEmployee(employeePayrollDataList.get(finalIndex).name, employeePayrollDataList.get(finalIndex).salary, employeePayrollDataList.get(finalIndex).startDate, employeePayrollDataList.get(finalIndex).gender, employeePayrollDataList.get(finalIndex).department, employeePayrollDataList.get(finalIndex).is_active);
                 } catch (EmployeePayrollException employeePayrollException) {
-                    employeePayrollException.printStackTrace();
+                    new EmployeePayrollException("Cannot execute query", EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
                 }
                 employeeMap.put(employeePayrollDataList.hashCode(), true);
                 System.out.println("Employee added: " + Thread.currentThread().getName());
@@ -29,13 +34,13 @@ public class EmployeePayrollService {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException interruptedException) {
-
+                throw new EmployeePayrollException(interruptedException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
             }
         }
         System.out.println(employeePayrollData);
     }
 
-    public void updateEmployeeDetailsWithThreads(List<EmployeePayrollData> employeePayrollDataList) {
+    public void updateEmployeeDetailsWithThreads(List<EmployeePayrollData> employeePayrollDataList) throws EmployeePayrollException {
         Map<Integer, Boolean> employeeMap = new HashMap<>();
         for(int index = 0; index < employeePayrollDataList.size(); index++) {
             int finalIndex = index;
@@ -45,7 +50,7 @@ public class EmployeePayrollService {
                 try {
                     this.updateEmployeeSalary(employeePayrollDataList.get(finalIndex).name, employeePayrollDataList.get(finalIndex).salary);
                 } catch (EmployeePayrollException employeePayrollException) {
-                    employeePayrollException.printStackTrace();
+                    new EmployeePayrollException("Cannot execute query", EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
                 }
                 employeeMap.put(employeePayrollDataList.hashCode(), true);
                 System.out.println("Employee updated: " + Thread.currentThread().getName());
@@ -57,7 +62,7 @@ public class EmployeePayrollService {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException interruptedException) {
-
+                throw new EmployeePayrollException(interruptedException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_EXECUTE_QUERY);
             }
         }
         System.out.println(employeePayrollData);
@@ -146,6 +151,17 @@ public class EmployeePayrollService {
         }
     }
 
-
+    public int addEmployeeToJSONServer(int id, String name, double salary) throws JSONException {
+        RestAssured.baseURI ="http://localhost:3000";
+        RequestSpecification request = RestAssured.given();
+        JSONObject requestParams = new JSONObject();
+        requestParams.put("id", id);
+        requestParams.put("name", name);
+        requestParams.put("salary", salary);
+        request.header("Content-Type", "application/json");
+        request.body(requestParams.toString());
+        Response response = request.post("/employees");
+        return response.getStatusCode();
+    }
 
 }
