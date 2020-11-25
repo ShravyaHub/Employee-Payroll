@@ -6,6 +6,7 @@ import io.restassured.specification.RequestSpecification;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -162,6 +163,24 @@ public class EmployeePayrollService {
         request.body(requestParams.toString());
         Response response = request.post("/employees");
         return response.getStatusCode();
+    }
+
+    public List<Integer> addEmployeeToJSONServer(List<EmployeePayrollData> employeePayrollDataList) throws EmployeePayrollException {
+        List<Integer> statusCode = new ArrayList<>();
+        Map<Integer, Boolean> employeeMap = new HashMap<>();
+        for(int index = 0; index < employeePayrollDataList.size(); index++) {
+            int finalIndex = index;
+            employeeMap.put(employeePayrollDataList.hashCode(), false);
+            System.out.println("Employee being added: " + Thread.currentThread().getName());
+            try {
+                statusCode.add(this.addEmployeeToJSONServer(employeePayrollDataList.get(finalIndex).id, employeePayrollDataList.get(finalIndex).name, employeePayrollDataList.get(finalIndex).salary));
+            } catch (JSONException jsonException) {
+                new EmployeePayrollException(jsonException.getMessage(), EmployeePayrollException.ExceptionType.CANNOT_ADD_DATA_TO_SERVER);
+            }
+            employeeMap.put(employeePayrollDataList.hashCode(), true);
+            System.out.println("Employee added: " + Thread.currentThread().getName());
+        }
+        return statusCode;
     }
 
 }
